@@ -61,6 +61,7 @@ typedef struct tagCAST_DEV {
     char  id[24];
     i32_t ch;
     void *user;
+    i32_t gfx_warned;   /* 포맷 거부 경고는 한 번만 */
 } CAST_DEV;
 
 /** "cam0".."cam7" → 슬롯 1.., "screen" → 슬롯 0. 그 외는 -1.
@@ -138,7 +139,20 @@ static void LBX_API close_cast_device(LBX_HANDLE dev)
 {
     CAST_DEV *d = (CAST_DEV *)dev;
     if (d == NULL) { return; }
-    if (s_core != NULL) { cast_core_close_ch(s_core, d->ch); }
+    if (s_core != NULL) {
+        cast_core_close_ch(s_core, d->ch);
+        /* Import 로 만들어진 GL/EGL 자원은 gfx 소유다 — 링 슬롯마다 하나씩
+         * 붙어 있으므로 전부 되돌려준다. 스레드를 세운 뒤라 경합 없다. */
+        if (s_host_api != NULL && s_host_api->gfx != NULL
+            && s_host_api->gfx->DestroyImage != NULL) {
+            const LBX_GFX_SERVICES *gfx = s_host_api->gfx;
+            LBX_IMAGE *slots[CAST_RING_DEPTH];
+            const i32_t n = cast_core_slots(s_core, d->ch, slots, CAST_RING_DEPTH);
+            for (i32_t i = 0; i < n; ++i) {
+                if (slots[i]->planes[0].texture != 0) { gfx->DestroyImage(gfx, slots[i]); }
+            }
+        }
+    }
     free(d);
 }
 
@@ -155,6 +169,31 @@ static i32_t LBX_API grab_cast_device(LBX_HANDLE dev, i32_t timeout_ms)
 
     img = cast_core_take(s_core, d->ch, timeout_ms);
     if (img == NULL) { return 0; }   /* 이번 사이클 미잡 — 정상 */
+
+    /* GPU 업로드는 드라이버 몫이다(avio-v4l2·avio-play 와 같은 규약). 그리고
+     * 반드시 여기서 — GL 컨텍스트를 쥔 스레드는 Grab 을 부르는 호스트 루프뿐이고
+     * 디코드 스레드에는 컨텍스트가 없다.
+     *
+     * 지원 포맷의 권위는 gfx 다. I420/NV12 를 여기서 판별하지 않고 그대로
+     * ImportImage 에 넘기고, 거부(-1)되면 경고 한 번 뒤 이 디바이스는 업로드를
+     * 접는다 — 텍스처 없이도 CPU 픽셀을 쓰는 소비자(동적 그림자 색 샘플링)는
+     * 계속 돌아야 하기 때문이다. */
+    if (s_host_api != NULL && s_host_api->gfx != NULL
+        && s_host_api->gfx->ImportImage != NULL && !d->gfx_warned) {
+        const LBX_GFX_SERVICES *gfx = s_host_api->gfx;
+        if (img->planes[0].texture == 0) {
+            if (gfx->ImportImage(gfx, img, NULL) != 0) {
+                Warn_("avio-cast: gfx CPU import 거부 " FOURCC_VFMT
+                      " - 이 디바이스는 업로드 생략", FOURCC_VARG(img->pixel_format));
+                d->gfx_warned = 1;
+            }
+            cast_core_upload_done(s_core, d->ch, img);
+        } else if (cast_core_upload_pending(s_core, d->ch, img)
+                   && gfx->UpdateImage != NULL) {
+            gfx->UpdateImage(gfx, img);
+            cast_core_upload_done(s_core, d->ch, img);
+        }
+    }
 
     if (s_drv != NULL && s_drv->OnFrame != NULL) {
         LBX_AVIO_FRAME_EVENT ev;

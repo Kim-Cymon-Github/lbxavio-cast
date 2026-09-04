@@ -129,6 +129,27 @@ LBX_IMAGE *cast_core_take(CAST_CORE *self, i32_t ch, i32_t timeout_ms);
 void  cast_core_ref(CAST_CORE *self, i32_t ch, const LBX_IMAGE *img);
 void  cast_core_unref(CAST_CORE *self, i32_t ch, const LBX_IMAGE *img);
 
+/**
+ * @brief Has this slot's content changed since it was last uploaded?
+ *
+ * The GPU upload is the driver's to make (host_api->gfx), on the thread that
+ * owns the GL context -- which is the Grab caller, never the decode thread.
+ * The bookkeeping is per slot, not per channel: every ring slot carries its
+ * own texture, so "already uploaded" is a property of the slot.
+ *
+ * @return 1 when the driver should Import (texture still 0) or Update.
+ */
+i32_t cast_core_upload_pending(CAST_CORE *self, i32_t ch, const LBX_IMAGE *img);
+/** Records that @p img was uploaded at its current sequence. */
+void  cast_core_upload_done(CAST_CORE *self, i32_t ch, const LBX_IMAGE *img);
+
+/**
+ * @brief Lists a channel's ring slot images so the driver can release the
+ *        GPU resources it had imported (gfx DestroyImage) at Close.
+ * @return How many were written to @p out.
+ */
+i32_t cast_core_slots(CAST_CORE *self, i32_t ch, LBX_IMAGE **out, i32_t max);
+
 /** Installs the encoded-packet tap. NULL removes it. */
 void  cast_core_set_packet_tap(CAST_CORE *self, CAST_PACKET_FN fn, void *user);
 

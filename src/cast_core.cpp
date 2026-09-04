@@ -42,6 +42,7 @@ struct CAST_SLOT {
     u8_t     *buf;        /* 플레인 전체를 담는 단일 할당                        */
     u32_t     buf_size;
     i32_t     ref_cnt;
+    u32_t     gfx_seq;    /* 이 슬롯이 마지막으로 GPU 에 올라간 sequence */
     u32_t     fill;       /* 채워진 순번 — drain-to-latest 판정                  */
     i32_t     ready;      /* 1 = 완성 프레임 보유, 아직 안 가져감                */
 };
@@ -118,6 +119,8 @@ bool relayout(CAST_CH *c, fourcc_t fcc, i32_t w, i32_t h)
             sl->img.planes[p].data        = (intptr_t)(sl->buf + off);
             off += (u32_t)(pw[p] * bpp[p] * ph[p]);
         }
+        /* 기하가 바뀌면 캐시된 텍스처는 크기가 어긋난다 — 다시 올려야 한다. */
+        sl->gfx_seq = 0;
         sl->ready   = 0;
         sl->ref_cnt = 0;
     }
@@ -233,6 +236,7 @@ CAST_CORE *cast_core_create(void)
             c->slot[s].buf_size = 0;
             c->slot[s].ref_cnt  = 0;
             c->slot[s].fill     = 0;
+            c->slot[s].gfx_seq  = 0;
             c->slot[s].ready    = 0;
         }
         c->fourcc = 0; c->w = 0; c->h = 0;
@@ -363,4 +367,46 @@ void cast_core_set_packet_tap(CAST_CORE *self, CAST_PACKET_FN fn, void *user)
     if (self == NULL) { return; }
     self->pkt_fn   = fn;
     self->pkt_user = user;
+}
+
+i32_t cast_core_upload_pending(CAST_CORE *self, i32_t ch, const LBX_IMAGE *img)
+{
+    if (self == NULL || ch < 0 || ch >= AVIO_CAST_MAX_CH || img == NULL) { return 0; }
+    {
+        CAST_CH *c = &self->ch[ch];
+        std::lock_guard<std::mutex> g(c->lock);
+        for (i32_t s = 0; s < CAST_RING_DEPTH; ++s) {
+            if (&(c->slot[s].img) != img) { continue; }
+            /* texture 0 = 아직 Import 전. sequence 불일치 = 내용이 바뀌었다. */
+            return (img->planes[0].texture == 0
+                    || c->slot[s].gfx_seq != img->sequence) ? 1 : 0;
+        }
+    }
+    return 0;
+}
+
+void cast_core_upload_done(CAST_CORE *self, i32_t ch, const LBX_IMAGE *img)
+{
+    if (self == NULL || ch < 0 || ch >= AVIO_CAST_MAX_CH || img == NULL) { return; }
+    {
+        CAST_CH *c = &self->ch[ch];
+        std::lock_guard<std::mutex> g(c->lock);
+        for (i32_t s = 0; s < CAST_RING_DEPTH; ++s) {
+            if (&(c->slot[s].img) == img) { c->slot[s].gfx_seq = img->sequence; return; }
+        }
+    }
+}
+
+i32_t cast_core_slots(CAST_CORE *self, i32_t ch, LBX_IMAGE **out, i32_t max)
+{
+    i32_t n = 0;
+    if (self == NULL || ch < 0 || ch >= AVIO_CAST_MAX_CH || out == NULL) { return 0; }
+    {
+        CAST_CH *c = &self->ch[ch];
+        std::lock_guard<std::mutex> g(c->lock);
+        for (i32_t s = 0; s < CAST_RING_DEPTH && n < max; ++s) {
+            out[n++] = &(c->slot[s].img);
+        }
+    }
+    return n;
 }
