@@ -1,0 +1,8 @@
+[submodule "lib/lbx"]
+	path = lib/lbx
+	url = git@github.com:litbig-git/lbx.git
+	ignore = dirty
+[submodule "lib/imgui"]
+	path = lib/imgui
+	url = https://github.com/ocornut/imgui.git
+	ignore = dirty

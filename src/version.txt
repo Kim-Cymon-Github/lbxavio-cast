@@ -1,0 +1,13 @@
+﻿/**
+ * avio-cast version 정보
+ * .h파일에서 함부로 include하지 말 것
+ */
+#ifndef version_TXT
+#define version_TXT
+
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 1
+#define VERSION_PATCH 0
+#define BUILD_NUMBER 1
+
+#endif //#ifndef version_TXT
