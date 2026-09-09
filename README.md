@@ -88,8 +88,30 @@ cast 가 돌아 계약이 두 번째 소비자를 견딘 걸 확인한 뒤 lbx �
 ## 빌드
 
 Windows 전용이다. 보드가 자기 cast 를 받을 이유가 없고, 디코더가 PC 쪽 의존(libav*)이다.
-`FFMPEG_SDK` / `GSTREAMER_1_0_ROOT_MSVC_X86_64` 환경변수를 쓴다.
 
 ```
 build/vs/avio-cast.sln
 ```
+
+### 빌드 환경 (환경변수)
+
+`vcxproj` 의 `IncludePath`/`LibraryPath` 가 아래 변수를 그대로 참조한다.
+
+| 변수 | 예시 값 | 누가 설정하나 |
+|---|---|---|
+| `FFMPEG_SDK` | `C:\sdk\ffmpeg` | **직접 선언해야 한다** |
+| `GSTREAMER_1_0_ROOT_MSVC_X86_64` | `C:\sdk\gstreamer\1.0\msvc_x86_64` | GStreamer MSVC 배포판 설치 시 자동 |
+
+변수가 비어 있으면 경로가 통째로 사라지고, 없는 SDK 가 아니라 **헤더를 못 찾는 형태**로
+실패한다:
+
+```
+error C1083: 포함 파일을 열 수 없습니다. 'libavformat/avformat.h'
+```
+
+> **새로 만든 환경변수는 이미 떠 있는 프로세스가 받지 못한다.**
+> Visual Studio·터미널·에이전트 세션을 모두 닫았다 다시 열어야 반영된다.
+> (2026-09-09 에 정확히 이 이유로 빌드가 깨졌다.)
+
+이 드라이버는 ffmpeg 와 gstreamer 를 **둘 다** 요구한다. 디코더 백엔드를 하나로
+정리하는 건 미결 과제다 — `drv/avio-play` 도 같은 상태다.
