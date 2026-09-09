@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -76,8 +76,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\..\..\lib\lbx\lib\vs\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(FFMPEG_SDK)\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;..\..\..\lib\lbx\include;..\..\..\lib\imgui;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>..\..\..\lib\lbx\lib\vs\$(Platform)\$(Configuration)\;$(FFMPEG_SDK)\lib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(FFMPEG_SDK)\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\lib\glib-2.0\include;..\..\..\lib\lbx\include;..\..\..\lib\imgui;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>..\..\..\lib\lbx\lib\vs\$(Platform)\$(Configuration)\;$(FFMPEG_SDK)\lib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -94,8 +94,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\..\..\lib\lbx\lib\vs\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(FFMPEG_SDK)\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib\glib-2.0\include;..\..\..\lib\lbx\include;..\..\..\lib\imgui;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>..\..\..\lib\lbx\lib\vs\$(Platform)\$(Configuration)\;$(FFMPEG_SDK)\lib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(FFMPEG_SDK)\include;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\include\gstreamer-1.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\include\glib-2.0;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\lib\glib-2.0\include;..\..\..\lib\lbx\include;..\..\..\lib\imgui;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>..\..\..\lib\lbx\lib\vs\$(Platform)\$(Configuration)\;$(FFMPEG_SDK)\lib;$(GSTREAMER_1_0_ROOT_MSVC_X86_64)\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
