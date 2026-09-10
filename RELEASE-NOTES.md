@@ -1,5 +1,16 @@
 # avio-cast 릴리스 노트
 
+## AVIO-CAST v0.2.1 (2026-09-10)
+
+### 버그 수정
+
+- `fix(build)`: `GSTREAMER_1_0_ROOT_MSVC_X86_64` 환경변수 뒤에 경로 구분자를 명시해 include/lib
+  경로가 이어 붙던 문제 수정.
+
+### 개선
+
+- lbx-core 2.7 Result 프로토콜 헤더 반영 재빌드. 드라이버 소스 변경 없음.
+
 ## AVIO-CAST v0.2.0 (2026-09-09)
 
 ### 버그 수정
