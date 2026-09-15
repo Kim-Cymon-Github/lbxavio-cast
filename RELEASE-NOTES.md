@@ -1,5 +1,14 @@
 # avio-cast 릴리스 노트
 
+## AVIO-CAST v0.3.0 (2026-09-15)
+
+### 개선
+
+- vcxproj x64 Debug/Release 의 IncludePath/LibraryPath 에 남아 있던 gst SDK 경로 4건 제거.
+  avio-play vcxproj 복사 흔적으로, avio-cast 는 Windows 전용·디코더는 ffmpeg(avcodec) 하나뿐이라
+  gst SDK 불필요. 빌드에 gst SDK 가 필요하다는 오진 방지.
+- lbx-core 2.7.0 헤더 갱신(var JSON5 확장) 반영 재빌드. 드라이버 소스 변경 없음.
+
 ## AVIO-CAST v0.2.1 (2026-09-10)
 
 ### 버그 수정
